@@ -18,6 +18,10 @@ public class Access_Record {
 	public boolean containsKey(String key){
 		return obj.containsKey(key);
 	}
+	
+	public Access_Data get(String ip){
+		return obj.get(ip);
+	}
 
 }
 

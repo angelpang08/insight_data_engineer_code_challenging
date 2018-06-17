@@ -18,9 +18,11 @@ public class sessionization {
 	private static int cik_pos;
 	private static int accession_pos;
 	private static int extention_pos;
-	private static int fields_num;
+	private static int fields_num=6;
 	
 	private static long period=0;
+
+	private static BufferedWriter writer;
 	
 	public static void main(String[] args) throws IOException{
 
@@ -47,11 +49,7 @@ public class sessionization {
 		}else {
 			System.out.println("note: output path exists");
 		}
-		BufferedWriter writer = new BufferedWriter(new FileWriter(outputFile));
-	    writer.write("write here\n");
-	    writer.write("write there\n");
-	     
-	    writer.close();
+		writer = new BufferedWriter(new FileWriter(outputFile));
 		
 	    
 		String st;
@@ -86,12 +84,15 @@ public class sessionization {
 		//read and write synchronize
 		while ((st = reader.readLine()) != null){
 			Access_Data new_access=parse(st);
+            //deGug;
+            System.out.println(new_access.printSession());
+            
+            String ip= new_access.getIp();
+            
 			if(current_dt != new_access.getDateTime()){
 				current_dt = new_access.getDateTime();
 				update(current_dt, time_link, access_record);
-				
-				String ip= new_access.getIp();
-				time_link.add(ip, current_dt);
+                
 				if(access_record.containsKey(ip) ){
 					Access_Data exist_data = access_record.remove(ip);
 					exist_data.active(new_access);
@@ -100,28 +101,24 @@ public class sessionization {
 				}
 				
 			}
+            time_link.add(ip, current_dt);
 			
 			
 		}
 		reader.close();
-		
-		ArrayList<String> unfinished_list =log_end();
-		int size = unfinished_list.size();
-		for(int i=0;i<size;i++){
-			writer.write(unfinished_list.get(i));
-		}
+		log_end(time_link,access_record);
+        writer.close();
 		
 	}
 	
-	private static ArrayList<String> log_end(){		
-		return null;	
-	}
+
 	
 	
 	private static void init_pos( String st ){
 		String[] fields= st.split(",");
 		int get=0;
 		for(int i=0; i<fields.length && get<fields_num;i++){
+           
 			switch (fields[i].toLowerCase()){
 	            case "ip":  
 	            	ip_pos=i;
@@ -155,6 +152,7 @@ public class sessionization {
 			System.out.println("unvaild log.csv information");
 			System.exit(-1);
 		}
+        
 	}
 	
 	
@@ -169,19 +167,48 @@ public class sessionization {
 				fields[extention_pos] );	
 	}
 	
+	private static void writeoutput(Access_Data exist_data) {
+			try {
+				writer.write(exist_data.printSession());
+			} catch (IOException e) {
+				e.printStackTrace();
+			}
+	}
+	
 	private static void update(long current_dt, Time_Link time_link, Access_Record access_record){
-		
 		while( !time_link.isEmpty() && isExpire(Time_Link.getFirstDateTime(), period, current_dt)){
 			String ip = time_link.remove();
+            System.out.println(ip);
 			if(access_record.containsKey(ip) ){
-				Access_Data exist_data = access_record.remove(ip);
+				Access_Data exist_data = access_record.get(ip);
 				if(exist_data.isExpire(period, current_dt)){
 					access_record.remove(ip);
+					writeoutput(exist_data);
 				}
 			}
 		}
 		
 	}
+
+	private static void log_end(Time_Link time_link, Access_Record access_record){		
+		while(!time_link.isEmpty()){
+			long add_time = time_link.getFirstDateTime();
+			String ip = time_link.remove();
+            
+            System.out.println(ip);
+			
+			if(access_record.containsKey(ip) ){
+				Access_Data exist_data = access_record.get(ip);
+				if(exist_data.getDateTime() == add_time ){
+					access_record.remove(ip);
+					writeoutput(exist_data);
+				}
+			}
+		}	
+	}
+
+
+
 	/**
 	 * Identiry if the access session has expired;
 	 * the session is over when the end of the file is reached 
@@ -193,8 +220,10 @@ public class sessionization {
 	 * and there are no further requests from that user by 00:00:04, 
 	 * then the session is considered over at 00:00:01.
 	 * 
-	 * @param  period the period
-	 * @param  y the current date and time of current reading line 
+	 * 
+	 * @param  dt the date and time to be identify whether expired
+	 * @param  period is the period how long inactive session expire 
+	 * @param  current_dt the current date and time of current reading line 
 	 * @return true if expired;
 	 *         false if not expired.
 	 * 
@@ -202,10 +231,6 @@ public class sessionization {
 	public static boolean isExpire(long dt, long prd,long current_dt){
 		return dt+prd<current_dt;
 	}
-	
-	private static boolean check(){
-		
-		return false;
-	}
+
 
 }
