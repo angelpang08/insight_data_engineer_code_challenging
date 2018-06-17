@@ -84,26 +84,22 @@ public class sessionization {
 		//read and write synchronize
 		while ((st = reader.readLine()) != null){
 			Access_Data new_access=parse(st);
-            //deGug;
-            System.out.println(new_access.printSession());
             
             String ip= new_access.getIp();
             
 			if(current_dt != new_access.getDateTime()){
 				current_dt = new_access.getDateTime();
 				update(current_dt, time_link, access_record);
-                
-				if(access_record.containsKey(ip) ){
+			}
+            if(access_record.containsKey(ip) ){
 					Access_Data exist_data = access_record.remove(ip);
 					exist_data.active(new_access);
-				}else{
-					access_record.put(ip, new_access);
-				}
-				
-			}
+                    access_record.put(ip, exist_data);
+            }else{
+                access_record.put(ip, new_access);
+            }
             time_link.add(ip, current_dt);
-			
-			
+
 		}
 		reader.close();
 		log_end(time_link,access_record);
@@ -178,7 +174,7 @@ public class sessionization {
 	private static void update(long current_dt, Time_Link time_link, Access_Record access_record){
 		while( !time_link.isEmpty() && isExpire(Time_Link.getFirstDateTime(), period, current_dt)){
 			String ip = time_link.remove();
-            System.out.println(ip);
+            
 			if(access_record.containsKey(ip) ){
 				Access_Data exist_data = access_record.get(ip);
 				if(exist_data.isExpire(period, current_dt)){
@@ -194,8 +190,6 @@ public class sessionization {
 		while(!time_link.isEmpty()){
 			long add_time = time_link.getFirstDateTime();
 			String ip = time_link.remove();
-            
-            System.out.println(ip);
 			
 			if(access_record.containsKey(ip) ){
 				Access_Data exist_data = access_record.get(ip);

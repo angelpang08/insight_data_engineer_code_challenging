@@ -19,16 +19,12 @@ public class Access_Data {
 		this.cik=cik;
 		this.accession=accession;
 		this.extention=accession;
-        
-        
-		//System.out.println("date: "+date);
-		//System.out.println("time: "+time);
 		
 		SimpleDateFormat sdf = new SimpleDateFormat ("yyyy-MM-ddHH:mm:ss");
 		try {
 			Date dt = sdf.parse(date+time);
 			dt_first= dt_last = dt.getTime();
-            System.out.println(dt_last);
+            
 		} catch (ParseException e) {
 			System.out.println("wrong date or time format, exit");
 			System.exit(-1);
@@ -49,7 +45,7 @@ public class Access_Data {
 	}
 	
 	public 	long duration (){
-		return 0;
+		return (dt_last-dt_first)/1000 +1;
 	}
 	
 	public String printSession(){
@@ -58,7 +54,7 @@ public class Access_Data {
 		
 		sb.append(getIp());
 		sb.append(separator);
-		System.out.println(dt_last);
+		
 		SimpleDateFormat sdf = new SimpleDateFormat ("yyyy-MM-dd','HH:mm:ss");
 		
 		sb.append(sdf.format(new Date(dt_first)));
