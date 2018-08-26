@@ -22,6 +22,13 @@ public class Access_Record {
 	public Access_Data get(String ip){
 		return obj.get(ip);
 	}
+    
+    public Access_Data[] sort(){
+        Access_Data[] values= Access_Data[obj.size()];
+        for ( Access_Data value : obj.values()) {  
+            
+        }
+    }
 
 }
 

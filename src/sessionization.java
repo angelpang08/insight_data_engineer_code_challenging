@@ -102,7 +102,8 @@ public class sessionization {
 
 		}
 		reader.close();
-		log_end(time_link,access_record);
+		//log_end(time_link,access_record);
+        log_end(access_record);
         writer.close();
 		
 	}
@@ -193,13 +194,27 @@ public class sessionization {
 			
 			if(access_record.containsKey(ip) ){
 				Access_Data exist_data = access_record.get(ip);
+                System.out.println(ip);
+                System.out.println(add_time);
+                System.out.println(exist_data.getDateTime());
+                System.out.println();
 				if(exist_data.getDateTime() == add_time ){
+                   
 					access_record.remove(ip);
 					writeoutput(exist_data);
 				}
 			}
 		}	
 	}
+    private static void log_end(Access_Record access_record){
+        Access_Data[] left_access= aceess_record.sort();
+        for(int i=0; i<left_access.length;i++){
+            writeoutput(left_access[i]);
+        }
+        
+        
+        
+    }
 
 
 
